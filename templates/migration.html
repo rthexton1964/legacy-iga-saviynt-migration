@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migration Execution | Legacy IGA to Saviynt</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .migration-header {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            padding: 60px 0;
+        }
+        .phase-card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        .phase-completed {
+            border-left: 4px solid #28a745;
+            background: linear-gradient(45deg, #d4edda, #f8f9fa);
+        }
+        .phase-active {
+            border-left: 4px solid #ffc107;
+            background: linear-gradient(45deg, #fff3cd, #f8f9fa);
+        }
+        .phase-pending {
+            border-left: 4px solid #6c757d;
+            background: #f8f9fa;
+        }
+        .progress-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            background: conic-gradient(#28a745 0deg, #28a745 0deg, #e9ecef 0deg);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .progress-circle::before {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            border-radius: 50%;
+            background: white;
+            z-index: 1;
+        }
+        
+        .progress-circle .progress-text {
+            position: relative;
+            z-index: 2;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .migration-timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+        .timeline-item {
+            position: relative;
+            padding: 20px 0;
+            border-left: 3px solid #dee2e6;
+            margin-left: 20px;
+            padding-left: 40px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 30px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #6c757d;
+        }
+        .timeline-item.completed::before {
+            background: #28a745;
+        }
+        .timeline-item.active::before {
+            background: #ffc107;
+        }
+        .timeline-item.pending::before {
+            background: #6c757d;
+        }
+        .real-time-metrics {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .migration-overview {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        }
+        
+        .metric-card {
+            transition: transform 0.2s;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #dee2e6;
+        }
+        
+        .timeline-marker {
+            position: absolute;
+            left: 5px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #28a745;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding: 15px 0;
+            border-left: 2px solid #e9ecef;
+            margin-left: 15px;
+            padding-left: 25px;
+        }
+        
+        .timeline-item.completed {
+            border-left-color: #28a745;
+        }
+        
+        .timeline-item.active {
+            border-left-color: #007bff;
+            background: linear-gradient(90deg, rgba(0,123,255,0.1) 0%, transparent 100%);
+        }
+        
+        .timeline-item.pending {
+            border-left-color: #6c757d;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 20px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #e9ecef;
+        }
+        
+        .timeline-item.completed::before {
+            background: #28a745;
+        }
+        
+        .timeline-item.active::before {
+            background: #007bff;
+            box-shadow: 0 0 10px rgba(0,123,255,0.5);
+        }
+        
+        .timeline-item.pending::before {
+            background: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-exchange-alt me-2"></i>Rex-AI-Palooza | Legacy IGA → Saviynt
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/discovery?system={{ system }}">Discovery</a>
+                <a class="nav-link active" href="/migration?system={{ system }}">Migration</a>
+                <a class="nav-link" href="/compliance?system={{ system }}" id="complianceLink">Compliance</a>
+                <a class="nav-link" href="/analytics?system={{ system }}" id="analyticsLink">Analytics</a>
+                <a class="nav-link" href="/reports?system={{ system }}" id="reportsLink">Reports</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Migration Header -->
+    <div class="migration-header">
+        <div class="container text-center">
+            <h1 class="display-5 fw-bold mb-4">
+                <i class="fas fa-cogs me-3"></i>Migration Execution Dashboard
+            </h1>
+            <p class="lead">Real-time monitoring of your Legacy IGA to Saviynt migration</p>
+        </div>
+    </div>
+
+    <!-- Migration Overview -->
+    <div class="container my-5">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Migration Overview</h5>
+                        <span class="badge bg-light text-primary" id="migrationStatus">{{ migration_info.timeline.status }}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 text-center">
+                                <div class="progress-circle" id="overallProgress">
+                                    <span class="progress-text">0%</span>
+                                </div>
+                                <small class="text-muted d-block mt-2">Overall Progress</small>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Source System</h6>
+                                        <p class="text-muted mb-2">
+                                            <i class="{{ migration_info.source_system.icon }} text-{{ migration_info.source_system.color }} me-2"></i>
+                                            {{ migration_info.source_system.name }}
+                                            <small class="d-block text-muted">Version: {{ migration_info.source_system.version }}</small>
+                                            <small class="d-block text-muted">Complexity: {{ migration_info.source_system.complexity }}</small>
+                                        </p>
+                                        
+                                        <h6>Target System</h6>
+                                        <p class="text-muted">
+                                            <i class="{{ migration_info.target_system.icon }} text-{{ migration_info.target_system.color }} me-2"></i>
+                                            {{ migration_info.target_system.name }}
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Migration Timeline</h6>
+                                        <p class="text-muted mb-2">
+                                            <i class="fas fa-calendar me-2"></i>
+                                            <span id="migrationTimeline">{{ migration_info.timeline.start_date }} - {{ migration_info.timeline.end_date }}</span>
+                                        </p>
+                                        
+                                        <h6>Estimated Duration</h6>
+                                        <p class="text-muted mb-2">
+                                            <i class="fas fa-clock me-2"></i>
+                                            <span>{{ migration_info.timeline.duration }}</span>
+                                        </p>
+                                        
+                                        <h6>Status</h6>
+                                        <p class="text-muted">
+                                            <i class="fas fa-flag-checkered me-2"></i>
+                                            <span id="estimatedCompletion">{{ migration_info.timeline.status }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <button class="btn btn-success btn-lg" onclick="startMigration()" id="startMigrationBtn">
+                                        <i class="fas fa-play me-2"></i>Start Migration
+                                    </button>
+                                    <button class="btn btn-outline-primary ms-2" onclick="pauseMigration()" id="pauseMigrationBtn" disabled>
+                                        <i class="fas fa-pause me-2"></i>Pause
+                                    </button>
+                                    <button class="btn btn-outline-secondary ms-2" onclick="viewLogs()">
+                                        <i class="fas fa-file-alt me-2"></i>View Logs
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Real-time Metrics -->
+        <div class="real-time-metrics" id="realTimeMetrics" style="display: none;">
+            <h5 class="mb-3"><i class="fas fa-chart-line me-2"></i>Real-time Migration Metrics</h5>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <h4 class="text-primary" id="identitiesMigrated">0</h4>
+                        <small class="text-muted">Identities Migrated</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <h4 class="text-success" id="rolesMigrated">0</h4>
+                        <small class="text-muted">Roles Converted</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <h4 class="text-warning" id="policiesMigrated">0</h4>
+                        <small class="text-muted">Policies Migrated</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <h4 class="text-info" id="migrationSpeed">0</h4>
+                        <small class="text-muted">Items/Hour</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Migration Phases -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <h5><i class="fas fa-tasks me-2"></i>Migration Phases</h5>
+                <div class="row">
+                    {% for phase in migration_phases %}
+                    <div class="col-lg-4 col-md-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="{{ phase.status_icon }} me-2"></i>
+                                    <h6 class="mb-0">{{ phase.name }}</h6>
+                                </div>
+                                <p class="text-muted small">{{ phase.description }}</p>
+                                <div class="progress mb-2">
+                                    <div class="progress-bar {{ phase.progress_color }}" style="width: {{ phase.progress }}%"></div>
+                                </div>
+                                <small class="text-muted">{{ phase.progress }}% Complete</small>
+                                
+                                <!-- Real-time Phase Activity -->
+                                {% if phase.is_active %}
+                                <div class="mt-3 p-2 bg-light rounded">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-spinner fa-spin text-primary me-2"></i>
+                                        <small class="fw-bold">Currently Processing:</small>
+                                    </div>
+                                    <div id="phase{{ loop.index }}Activity" class="small text-muted">
+                                        <div class="mb-1">
+                                            <i class="fas fa-arrow-right me-2"></i>
+                                            <span id="currentActivity{{ loop.index }}">{{ phase.current_activity }}</span>
+                                        </div>
+                                        <div class="progress" style="height: 4px;">
+                                            <div id="activityProgress{{ loop.index }}" class="progress-bar bg-info" style="width: {{ phase.activity_progress }}%"></div>
+                                        </div>
+                                        <small id="activityDetail{{ loop.index }}" class="text-muted">{{ phase.activity_detail }}</small>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                <div class="mt-2">
+                                    <div class="d-flex justify-content-between">
+                                        <small class="text-muted">{{ phase.tasks_completed }}/{{ phase.total_tasks }} tasks</small>
+                                        <small class="text-muted">{{ phase.duration }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Migration Activity Feed -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-broadcast-tower me-2"></i>Live Migration Activity
+                            <span class="badge bg-success ms-2">ACTIVE</span>
+                        </h5>
+                    </div>
+                    <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                        <div id="activityFeed">
+                            <div class="text-muted text-center py-4">
+                                <i class="fas fa-play-circle fa-2x mb-2"></i>
+                                <p>Migration activity will appear here when you start the migration process</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Migration Timeline -->
+        <div class="row mt-5">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Migration Timeline</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="migration-timeline" id="migrationTimelineDetail">
+                            <div class="text-muted text-center py-4">
+                                <i class="fas fa-clock fa-2x mb-2"></i>
+                                <p>Migration timeline will be populated when you start the migration</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Issues & Alerts</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="migrationAlerts">
+                            <div class="text-muted text-center py-3">
+                                <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                <p>No issues detected</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let migrationInterval = null;
+        let activityInterval = null;
+        let isRunning = false;
+        let currentProgress = 0;
+
+        function startMigration() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            currentProgress = 0;
+            
+            // Update button states
+            document.getElementById('startMigrationBtn').disabled = true;
+            document.getElementById('pauseMigrationBtn').disabled = false;
+            document.getElementById('migrationStatus').textContent = 'IN PROGRESS';
+            document.getElementById('migrationStatus').className = 'badge bg-warning';
+            
+            // Show real-time metrics
+            document.getElementById('realTimeMetrics').style.display = 'block';
+            
+            // Start migration simulation for 1-minute demo
+            simulateMigrationProgress();
+            simulateActivityFeed();
+            populateMigrationTimeline();
+            populateIssuesAndAlerts();
+        }
+
+        function simulateMigrationProgress() {
+            migrationInterval = setInterval(() => {
+                if (currentProgress < 100 && isRunning) {
+                    currentProgress += 100 / 30; // Complete in 60 seconds (100% / 30 updates)
+                    if (currentProgress > 100) currentProgress = 100;
+                    
+                    // Update main progress
+                    const progressCircle = document.getElementById('overallProgress');
+                    const degrees = (currentProgress / 100) * 360;
+                    progressCircle.style.background = `conic-gradient(#28a745 0deg, #28a745 ${degrees}deg, #e9ecef ${degrees}deg)`;
+                    progressCircle.querySelector('.progress-text').textContent = Math.round(currentProgress) + '%';
+                    
+                    // Update metrics with realistic increments
+                    updateMigrationMetrics(currentProgress);
+                    
+                    // Update phase progress
+                    updatePhaseProgress(currentProgress);
+                } else if (currentProgress >= 100) {
+                    completeMigration();
+                }
+            }, 2000); // Update every 2 seconds
+        }
+        
+        function updatePhaseProgress(progress) {
+            // Update different phases based on overall progress
+            const phases = [
+                { id: 1, name: "Identity Discovery", start: 0, end: 20 },
+                { id: 2, name: "Role Analysis", start: 20, end: 40 },
+                { id: 3, name: "Policy Migration", start: 40, end: 65 },
+                { id: 4, name: "Data Transfer", start: 65, end: 85 },
+                { id: 5, name: "Validation", start: 85, end: 95 },
+                { id: 6, name: "Go-Live", start: 95, end: 100 }
+            ];
+            
+            phases.forEach(phase => {
+                const phaseProgress = Math.max(0, Math.min(100, 
+                    ((progress - phase.start) / (phase.end - phase.start)) * 100
+                ));
+                
+                const progressBar = document.querySelector(`#phase${phase.id} .progress-bar`);
+                if (progressBar) {
+                    progressBar.style.width = phaseProgress + '%';
+                }
+            });
+        }
+
+        function populateMigrationTimeline() {
+            const timeline = document.getElementById('migrationTimelineDetail');
+            // Clear initial empty state message
+            timeline.innerHTML = '';
+            
+            const timelineItems = [
+                { time: '10:56:00', title: 'Migration Started', status: 'completed', icon: 'fa-play', color: 'success' },
+                { time: '10:56:15', title: 'Identity Discovery Phase', status: 'active', icon: 'fa-users', color: 'primary' },
+                { time: '10:56:45', title: 'Role Analysis Phase', status: 'pending', icon: 'fa-user-tag', color: 'secondary' },
+                { time: '10:57:15', title: 'Policy Migration Phase', status: 'pending', icon: 'fa-shield-alt', color: 'secondary' },
+                { time: '10:57:45', title: 'Data Transfer Phase', status: 'pending', icon: 'fa-database', color: 'secondary' },
+                { time: '10:58:15', title: 'Validation Phase', status: 'pending', icon: 'fa-check-circle', color: 'secondary' },
+                { time: '10:58:45', title: 'Go-Live Phase', status: 'pending', icon: 'fa-rocket', color: 'secondary' }
+            ];
+            
+            timeline.innerHTML = timelineItems.map(item => `
+                <div class="timeline-item ${item.status}">
+                    <div class="d-flex align-items-center">
+                        <i class="fas ${item.icon} text-${item.color} me-3"></i>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold">${item.title}</div>
+                            <small class="text-muted">${item.time}</small>
+                        </div>
+                        ${item.status === 'completed' ? '<i class="fas fa-check text-success"></i>' : 
+                          item.status === 'active' ? '<i class="fas fa-spinner fa-spin text-primary"></i>' : ''}
+                    </div>
+                </div>
+            `).join('');
+            
+            // Update timeline dynamically during migration
+            setTimeout(() => {
+                if (isRunning) updateTimelineProgress();
+            }, 15000); // Update after 15 seconds
+        }
+        
+        function updateTimelineProgress() {
+            if (!isRunning) return;
+            
+            const items = document.querySelectorAll('.timeline-item');
+            const progressThresholds = [0, 15, 30, 50, 70, 85, 95];
+            
+            items.forEach((item, index) => {
+                if (currentProgress >= progressThresholds[index]) {
+                    item.classList.remove('pending', 'active');
+                    item.classList.add('completed');
+                    item.querySelector('.fa-spinner')?.remove();
+                    item.querySelector('.fas').className = 'fas fa-check text-success me-3';
+                    if (!item.querySelector('.fa-check.text-success:last-child')) {
+                        item.querySelector('.d-flex').innerHTML += '<i class="fas fa-check text-success"></i>';
+                    }
+                } else if (currentProgress >= progressThresholds[index] - 10) {
+                    item.classList.remove('pending', 'completed');
+                    item.classList.add('active');
+                    item.querySelector('.fas').className = 'fas fa-spinner fa-spin text-primary me-3';
+                }
+            });
+            
+            setTimeout(() => {
+                if (isRunning) updateTimelineProgress();
+            }, 10000);
+        }
+
+        function populateIssuesAndAlerts() {
+            const alertsContainer = document.getElementById('migrationAlerts');
+            // Clear initial empty state message and populate with active content
+            alertsContainer.innerHTML = `
+                <div class="d-flex align-items-center text-success mb-3">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <small>No critical issues detected</small>
+                </div>
+                <div id="migrationWarnings"></div>
+            `;
+            
+            // Add some warnings during migration
+            setTimeout(() => {
+                if (isRunning) {
+                    addMigrationWarning('Duplicate email detected for user "j.smith" - auto-resolved', 'warning');
+                }
+            }, 20000);
+            
+            setTimeout(() => {
+                if (isRunning) {
+                    addMigrationWarning('Large role detected: IT_ADMIN (2,847 users) - processing...', 'info');
+                }
+            }, 35000);
+        }
+        
+        function addMigrationWarning(message, type) {
+            const warningsContainer = document.getElementById('migrationWarnings');
+            const iconClass = type === 'warning' ? 'fa-exclamation-triangle text-warning' : 'fa-info-circle text-info';
+            
+            warningsContainer.innerHTML += `
+                <div class="d-flex align-items-start mb-2">
+                    <i class="fas ${iconClass} me-2 mt-1"></i>
+                    <small>${message}</small>
+                </div>
+            `;
+        }
+
+        function completeMigration() {
+            clearInterval(migrationInterval);
+            clearInterval(activityInterval);
+            isRunning = false;
+            
+            document.getElementById('migrationStatus').textContent = 'COMPLETED';
+            document.getElementById('migrationStatus').className = 'badge bg-success';
+            document.getElementById('startMigrationBtn').disabled = false;
+            document.getElementById('startMigrationBtn').innerHTML = '<i class="fas fa-redo me-2"></i>Restart Migration';
+            document.getElementById('pauseMigrationBtn').disabled = true;
+            
+            // Final timeline update
+            document.querySelectorAll('.timeline-item').forEach(item => {
+                item.classList.remove('pending', 'active');
+                item.classList.add('completed');
+                item.querySelector('.fas').className = 'fas fa-check text-success me-3';
+            });
+            
+            // Add completion alert
+            addMigrationWarning('Migration completed successfully!', 'success');
+        }
+
+        function pauseMigration() {
+            if (!isRunning) return;
+            
+            isRunning = false;
+            clearInterval(migrationInterval);
+            clearInterval(activityInterval);
+            
+            document.getElementById('migrationStatus').textContent = 'PAUSED';
+            document.getElementById('migrationStatus').className = 'badge bg-secondary';
+            document.getElementById('startMigrationBtn').disabled = false;
+            document.getElementById('startMigrationBtn').innerHTML = '<i class="fas fa-play me-2"></i>Resume Migration';
+            document.getElementById('pauseMigrationBtn').disabled = true;
+        }
+
+        function updateMigrationMetrics(progress) {
+            const maxIdentities = 12847;
+            const maxRoles = 2341;
+            const maxPolicies = 127;
+            
+            const identitiesMigrated = Math.round((progress / 100) * maxIdentities);
+            const rolesMigrated = Math.round((progress / 100) * maxRoles);
+            const policiesMigrated = Math.round((progress / 100) * maxPolicies);
+            const speed = Math.round(150 + Math.random() * 100); // 150-250 per hour
+            
+            document.getElementById('identitiesMigrated').textContent = identitiesMigrated.toLocaleString();
+            document.getElementById('rolesMigrated').textContent = rolesMigrated.toLocaleString();
+            document.getElementById('policiesMigrated').textContent = policiesMigrated.toLocaleString();
+            document.getElementById('migrationSpeed').textContent = speed + '/hour';
+        }
+
+        function simulateActivityFeed() {
+            // Clear initial empty state message
+            const feed = document.getElementById('activityFeed');
+            feed.innerHTML = '';
+            
+            let activityIndex = 0;
+            
+            activityInterval = setInterval(() => {
+                if (activityIndex < 7) {
+                    addActivityToFeed(activityIndex);
+                    activityIndex++;
+                } else {
+                    // Reset and continue with new activities
+                    activityIndex = 0;
+                }
+            }, 5000); // Add new activity every 5 seconds
+        }
+
+        function addActivityToFeed(index) {
+            const feed = document.getElementById('activityFeed');
+            const activityDiv = document.createElement('div');
+            activityDiv.className = 'd-flex align-items-start mb-3';
+            activityDiv.style.opacity = '0';
+            
+            const activities = [
+                { type: 'success', icon: 'fa-check-circle', text: 'Identity Migration Batch #47 Completed', detail: 'Successfully migrated 250 user identities to Saviynt', time: '2 minutes ago' },
+                { type: 'processing', icon: 'fa-cog fa-spin', text: 'Processing Role Conversion', detail: 'Converting "Sales Manager" role with 47 entitlements', time: 'Currently active' },
+                { type: 'success', icon: 'fa-check-circle', text: 'Application Integration Verified', detail: 'Salesforce connector tested and validated', time: '5 minutes ago' },
+                { type: 'warning', icon: 'fa-exclamation-triangle', text: 'Minor Issue Detected', detail: 'Duplicate email found for user "john.smith" - auto-resolved', time: '8 minutes ago' },
+                { type: 'success', icon: 'fa-check-circle', text: 'Policy Migration Completed', detail: 'Migrated 23 access policies with 100% accuracy', time: '12 minutes ago' },
+                { type: 'processing', icon: 'fa-sync fa-spin', text: 'Synchronizing User Attributes', detail: 'Mapping legacy attributes to Saviynt schema', time: 'In progress' },
+                { type: 'success', icon: 'fa-shield-check', text: 'Security Validation Passed', detail: 'All migrated identities passed security checks', time: '15 minutes ago' }
+            ];
+            
+            const typeClass = activities[index].type === 'success' ? 'text-success' : 
+                            activities[index].type === 'warning' ? 'text-warning' : 'text-primary';
+            
+            activityDiv.innerHTML = `
+                <i class="fas ${activities[index].icon} ${typeClass} me-3 mt-1"></i>
+                <div>
+                    <div class="fw-bold">${activities[index].text}</div>
+                    <small class="text-muted">${activities[index].detail}</small>
+                    <div class="text-muted small">${activities[index].time}</div>
+                </div>
+            `;
+            
+            // Insert at the top
+            feed.insertBefore(activityDiv, feed.firstChild);
+            
+            // Animate in
+            setTimeout(() => {
+                activityDiv.style.transition = 'opacity 0.5s';
+                activityDiv.style.opacity = '1';
+            }, 100);
+            
+            // Remove oldest activities to keep feed manageable
+            const activitiesList = feed.children;
+            if (activitiesList.length > 8) {
+                feed.removeChild(activitiesList[activitiesList.length - 1]);
+            }
+        }
+
+        function viewLogs() {
+            alert('Opening migration logs in new window...');
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial metrics
+            updateMigrationMetrics(0);
+            
+            // Get system parameter from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const system = urlParams.get('system');
+            
+            // Update navigation links with system parameter
+            const links = document.querySelectorAll('.nav-link');
+            links.forEach(link => {
+                if (link.href.includes('?')) {
+                    link.href += `&system=${system}`;
+                } else {
+                    link.href += `?system=${system}`;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

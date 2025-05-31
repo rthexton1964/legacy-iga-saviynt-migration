@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migration Analytics | Legacy IGA to Saviynt</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .analytics-header {
+            background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+            color: white;
+            padding: 60px 0;
+        }
+        .analytics-card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .analytics-card:hover {
+            transform: translateY(-3px);
+        }
+        .metric-card {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            border-left: 4px solid #007bff;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        .kpi-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .trend-up {
+            color: #28a745;
+        }
+        .trend-down {
+            color: #dc3545;
+        }
+        .timeline-roadmap {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+        .phase-marker {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin: 0 auto 10px auto;
+        }
+        .phase-completed {
+            background: #28a745;
+            color: white;
+        }
+        .phase-active {
+            background: #ffc107;
+            color: black;
+        }
+        .phase-upcoming {
+            background: #6c757d;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-exchange-alt me-2"></i>Rex-AI-Palooza | Legacy IGA → Saviynt
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/discovery?system={{ system }}">Discovery</a>
+                <a class="nav-link" href="/migration?system={{ system }}">Migration</a>
+                <a class="nav-link" href="/compliance?system={{ system }}">Compliance</a>
+                <a class="nav-link active" href="/analytics?system={{ system }}">Analytics</a>
+                <a class="nav-link" href="/reports?system={{ system }}">Reports</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Analytics Header -->
+    <div class="analytics-header">
+        <div class="container text-center">
+            <h1 class="display-5 fw-bold mb-4">
+                <i class="fas fa-chart-line me-3"></i>Migration Analytics Dashboard
+            </h1>
+            <p class="lead">Real-time insights and performance metrics for your Legacy IGA to Saviynt migration</p>
+        </div>
+    </div>
+
+    <!-- Key Performance Indicators -->
+    <div class="container my-5">
+        <div class="row mb-5">
+            <div class="col-12">
+                <h4 class="mb-4"><i class="fas fa-tachometer-alt me-2"></i>Key Performance Indicators</h4>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card analytics-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-percentage fa-3x text-primary mb-3"></i>
+                        <div class="kpi-number text-primary">{{ analytics.overall_progress }}%</div>
+                        <h6>Migration Progress</h6>
+                        <small class="text-muted trend-up">
+                            <i class="fas fa-arrow-up me-1"></i>+12% this week
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card analytics-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-users fa-3x text-success mb-3"></i>
+                        <div class="kpi-number text-success">{{ "{:,}".format(analytics.identities_migrated) }}</div>
+                        <h6>Identities Migrated</h6>
+                        <small class="text-muted trend-up">
+                            <i class="fas fa-arrow-up me-1"></i>+2,450 today
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card analytics-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-shield-check fa-3x text-warning mb-3"></i>
+                        <div class="kpi-number text-warning">{{ analytics.compliance_score }}%</div>
+                        <h6>Compliance Score</h6>
+                        <small class="text-muted trend-up">
+                            <i class="fas fa-arrow-up me-1"></i>+3% improvement
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card analytics-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-clock fa-3x text-info mb-3"></i>
+                        <div class="kpi-number text-info">{{ analytics.days_remaining }}</div>
+                        <h6>Days to Go-Live</h6>
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>On schedule
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Migration Timeline Roadmap -->
+        <div class="timeline-roadmap">
+            <div class="text-center mb-4">
+                <h4><i class="fas fa-map-marked-alt me-2"></i>Migration Roadmap & Strategic Timeline</h4>
+                <p class="mb-0">8-week comprehensive migration journey | {{ dates.current_phase }} of 5 phases complete</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-2 text-center">
+                    <div class="phase-marker phase-completed">✓</div>
+                    <h6>Phase 1</h6>
+                    <small>Discovery & Assessment</small>
+                    <div class="mt-2">
+                        <small class="opacity-75">{{ dates.discovery_start.strftime('%b %d') }} - {{ dates.analysis_complete.strftime('%b %d') }}</small>
+                    </div>
+                </div>
+                
+                <div class="col-md-2 text-center">
+                    <div class="phase-marker phase-completed">✓</div>
+                    <h6>Phase 2</h6>
+                    <small>Identity Migration</small>
+                    <div class="mt-2">
+                        <small class="opacity-75">{{ dates.migration_start.strftime('%b %d') }} - {{ (dates.migration_start + timedelta(days=10)).strftime('%b %d') }}</small>
+                    </div>
+                </div>
+                
+                <div class="col-md-2 text-center">
+                    <div class="phase-marker phase-active">3</div>
+                    <h6>Phase 3</h6>
+                    <small>Role Conversion</small>
+                    <div class="mt-2">
+                        <small class="opacity-75">{{ (dates.migration_start + timedelta(days=11)).strftime('%b %d') }} - {{ (dates.migration_start + timedelta(days=21)).strftime('%b %d') }}</small>
+                    </div>
+                    <div class="progress mt-2" style="height: 6px;">
+                        <div class="progress-bar bg-warning" style="width: 73%"></div>
+                    </div>
+                    <small class="opacity-75">73% Complete</small>
+                </div>
+                
+                <div class="col-md-3 text-center">
+                    <div class="phase-marker phase-upcoming">4</div>
+                    <h6>Phase 4</h6>
+                    <small>Workflow & Policy Migration</small>
+                    <div class="mt-2">
+                        <small class="opacity-75">{{ (dates.migration_start + timedelta(days=22)).strftime('%b %d') }} - {{ dates.testing_phase.strftime('%b %d') }}</small>
+                    </div>
+                </div>
+                
+                <div class="col-md-3 text-center">
+                    <div class="phase-marker phase-upcoming">5</div>
+                    <h6>Phase 5</h6>
+                    <small>Go-Live & Production</small>
+                    <div class="mt-2">
+                        <small class="opacity-75">{{ dates.go_live.strftime('%b %d') }} - {{ dates.post_migration.strftime('%b %d') }}</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h6><i class="fas fa-bullseye me-2"></i>Current Milestone</h6>
+                    <p class="mb-0">Role mapping and entitlement conversion in progress</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <h6><i class="fas fa-flag-checkered me-2"></i>Next Go-Live Date</h6>
+                    <p class="mb-0">{{ dates.go_live.strftime('%B %d, %Y') }} ({{ analytics.days_remaining }} days)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="row mb-5">
+            <div class="col-lg-8">
+                <div class="card analytics-card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Migration Performance Trends</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="performanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="card analytics-card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>Phase Breakdown</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="phaseChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Comparison -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card analytics-card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-balance-scale me-2"></i>Legacy vs Saviynt Performance Comparison</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <h6 class="text-muted mb-3">Performance Metrics</h6>
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <small>User Provisioning Speed</small>
+                                        <small>Legacy: 24hrs | Saviynt: 15mins</small>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-danger" style="width: 15%">Legacy</div>
+                                        <div class="progress-bar bg-success" style="width: 85%">Saviynt</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <small>Access Certification Cycle</small>
+                                        <small>Legacy: 90 days | Saviynt: 30 days</small>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-warning" style="width: 25%">Legacy</div>
+                                        <div class="progress-bar bg-success" style="width: 75%">Saviynt</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <small>Policy Violation Detection</small>
+                                        <small>Legacy: Weekly | Saviynt: Real-time</small>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-warning" style="width: 30%">Legacy</div>
+                                        <div class="progress-bar bg-success" style="width: 70%">Saviynt</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-6">
+                                <h6 class="text-muted mb-3">Cost & Efficiency</h6>
+                                <div class="row text-center">
+                                    <div class="col-4">
+                                        <h4 class="text-success">67%</h4>
+                                        <small class="text-muted">Cost Reduction</small>
+                                    </div>
+                                    <div class="col-4">
+                                        <h4 class="text-primary">85%</h4>
+                                        <small class="text-muted">Process Automation</small>
+                                    </div>
+                                    <div class="col-4">
+                                        <h4 class="text-warning">40%</h4>
+                                        <small class="text-muted">Time Savings</small>
+                                    </div>
+                                </div>
+                                
+                                <hr>
+                                
+                                <h6 class="text-muted mb-3">ROI Projection</h6>
+                                <div class="text-center">
+                                    <div class="kpi-number text-success">$2.4M</div>
+                                    <small class="text-muted">Annual savings after migration</small>
+                                    <div class="mt-2">
+                                        <small class="text-success">
+                                            <i class="fas fa-arrow-up me-1"></i>
+                                            18-month ROI payback period
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Risk & Issues Tracking -->
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card analytics-card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Risk Register</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Custom Workflow Migration</h6>
+                                    <small class="text-muted">Complex legacy workflows require manual review</small>
+                                </div>
+                                <span class="badge bg-warning">Medium</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Data Quality Issues</h6>
+                                    <small class="text-muted">3% of identity records need cleanup</small>
+                                </div>
+                                <span class="badge bg-info">Low</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Training & Adoption</h6>
+                                    <small class="text-muted">User training schedule coordination</small>
+                                </div>
+                                <span class="badge bg-success">Mitigated</span>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-3">
+                            <button class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-plus me-2"></i>Add Risk Item
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="card analytics-card">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="fas fa-tools me-2"></i>Critical Dependencies</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Saviynt Environment Setup</h6>
+                                    <small class="text-muted">Production environment provisioning</small>
+                                </div>
+                                <span class="badge bg-success">On Track</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Network Connectivity</h6>
+                                    <small class="text-muted">VPN and firewall configuration</small>
+                                </div>
+                                <span class="badge bg-success">Complete</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Legacy System Freeze</h6>
+                                    <small class="text-muted">Change freeze during migration</small>
+                                </div>
+                                <span class="badge bg-warning">At Risk</span>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-3">
+                            <button class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-sitemap me-2"></i>View Dependency Matrix
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Performance Trends Chart
+            const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+            new Chart(performanceCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
+                    datasets: [{
+                        label: 'Identities Migrated',
+                        data: [0, 25000, 52000, 78000, 103000, 125000],
+                        borderColor: '#007bff',
+                        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }, {
+                        label: 'Roles Converted',
+                        data: [0, 450, 950, 1400, 1850, 2300],
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+
+            // Phase Progress Chart
+            const phaseCtx = document.getElementById('phaseChart').getContext('2d');
+            new Chart(phaseCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completed', 'In Progress', 'Pending'],
+                    datasets: [{
+                        data: [40, 33, 27],
+                        backgroundColor: ['#28a745', '#ffc107', '#6c757d'],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

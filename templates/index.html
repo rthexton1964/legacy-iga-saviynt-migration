@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legacy IGA to Saviynt Migration Platform | Rex-AI-Palooza</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 80px 0;
+        }
+        .system-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+        .system-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        .complexity-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .timeline-card {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            border-left: 4px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-exchange-alt me-2"></i>Rex-AI-Palooza | Legacy IGA → Saviynt
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/discovery">Discovery</a>
+                <a class="nav-link" href="/migration">Migration</a>
+                <a class="nav-link" href="/compliance">Compliance</a>
+                <a class="nav-link" href="/analytics">Analytics</a>
+                <a class="nav-link" href="/reports">Reports</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-4 fw-bold mb-4">
+                <i class="fas fa-shield-alt me-3"></i>Legacy IGA to Saviynt Migration
+            </h1>
+            <p class="lead mb-5">
+                Enterprise-grade migration platform for Oracle OIM, One Identity, IBM Tivoli, and SailPoint IdentityIQ to Saviynt
+            </p>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card bg-white text-dark p-4">
+                        <h5 class="mb-3">Migration Platform Powered by Rex-AI-Palooza</h5>
+                        <p class="mb-0">Comprehensive identity governance migration with AI-driven discovery, automated conversion, and compliance validation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supported Systems Section -->
+    <div class="container my-5">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Supported Legacy IGA Systems</h2>
+            <p class="text-muted">Choose your source system to begin the migration assessment</p>
+        </div>
+
+        <div class="row g-4">
+            {% for system_id, system in supported_systems.items() %}
+            <div class="col-lg-3 col-md-6">
+                <div class="card system-card h-100 position-relative" onclick="selectSystem('{{ system_id }}')">
+                    <span class="badge 
+                        {% if system.complexity == 'High' %}bg-danger{% elif system.complexity == 'Medium' %}bg-warning{% else %}bg-success{% endif %} 
+                        complexity-badge">{{ system.complexity }}</span>
+                    
+                    <div class="card-body d-flex flex-column">
+                        <div class="text-center mb-3">
+                            {% if system_id == 'oracle_oim' %}
+                                <i class="fab fa-oracle fa-3x text-danger mb-3"></i>
+                            {% elif system_id == 'one_identity' %}
+                                <i class="fas fa-id-card fa-3x text-primary mb-3"></i>
+                            {% elif system_id == 'ibm_tivoli' %}
+                                <i class="fab fa-ibm fa-3x text-dark mb-3"></i>
+                            {% else %}
+                                <i class="fas fa-anchor fa-3x text-info mb-3"></i>
+                            {% endif %}
+                        </div>
+                        
+                        <h5 class="card-title text-center">{{ system.name }}</h5>
+                        
+                        <div class="mt-auto">
+                            <small class="text-muted d-block mb-2">
+                                <i class="fas fa-code-branch me-1"></i>Versions: {{ system.version_support|join(', ') }}
+                            </small>
+                            <small class="text-muted d-block mb-3">
+                                <i class="fas fa-clock me-1"></i>Timeline: {{ system.typical_timeline }}
+                            </small>
+                            
+                            <button class="btn btn-outline-primary w-100">
+                                <i class="fas fa-search me-2"></i>Start Discovery
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Migration Timeline Overview -->
+    <div class="bg-light py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">Migration Timeline Overview</h2>
+                <p class="text-muted">Typical migration phases and timeline</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="timeline-card card h-100 p-4">
+                        <h5><i class="fas fa-search text-primary me-2"></i>Discovery & Assessment</h5>
+                        <p class="text-muted mb-2">{{ dates.discovery_start.strftime('%B %d') }} - {{ dates.analysis_complete.strftime('%B %d') }}</p>
+                        <small>System analysis, data extraction, compatibility assessment</small>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-4">
+                    <div class="timeline-card card h-100 p-4">
+                        <h5><i class="fas fa-exchange-alt text-warning me-2"></i>Data Migration</h5>
+                        <p class="text-muted mb-2">{{ dates.migration_start.strftime('%B %d') }} - {{ dates.testing_phase.strftime('%B %d') }}</p>
+                        <small>Identity, role, and policy migration with validation</small>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 col-lg-4">
+                    <div class="timeline-card card h-100 p-4">
+                        <h5><i class="fas fa-rocket text-success me-2"></i>Go-Live & Support</h5>
+                        <p class="text-muted mb-2">{{ dates.go_live.strftime('%B %d') }} - {{ dates.post_migration.strftime('%B %d') }}</p>
+                        <small>Production deployment and post-migration support</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="container my-5">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Platform Features</h2>
+            <p class="text-muted">Comprehensive migration capabilities powered by AI</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-robot fa-3x text-primary mb-3"></i>
+                        <h5>AI-Driven Discovery</h5>
+                        <p class="text-muted">Automated system analysis and intelligent mapping recommendations</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-shield-check fa-3x text-success mb-3"></i>
+                        <h5>Compliance Validation</h5>
+                        <p class="text-muted">SOX, GDPR, HIPAA compliance checks and risk assessment</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-line fa-3x text-info mb-3"></i>
+                        <h5>Real-time Analytics</h5>
+                        <p class="text-muted">Migration progress tracking and performance insights</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-file-alt fa-3x text-warning mb-3"></i>
+                        <h5>Automated Reports</h5>
+                        <p class="text-muted">Executive dashboards and detailed migration documentation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Saviynt Platform Benefits -->
+    <div class="bg-light py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">Why Migrate to Saviynt IGA Platform?</h2>
+                <p class="text-muted">Modern, cloud-native identity governance with enterprise-grade capabilities</p>
+            </div>
+
+            <!-- Key Value Propositions -->
+            <div class="row mb-5">
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-cloud fa-3x text-primary mb-3"></i>
+                            <h5>Cloud-Native Architecture</h5>
+                            <p class="text-muted">Built for the cloud from the ground up with 99.9% uptime SLA, automatic scaling, and zero-maintenance updates</p>
+                            <ul class="list-unstyled text-start">
+                                <li><i class="fas fa-check text-success me-2"></i>Multi-tenant SaaS deployment</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Global data centers with DR</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Elastic scalability</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-robot fa-3x text-success mb-3"></i>
+                            <h5>AI-Powered Intelligence</h5>
+                            <p class="text-muted">Advanced machine learning for intelligent access recommendations, risk scoring, and automated decision-making</p>
+                            <ul class="list-unstyled text-start">
+                                <li><i class="fas fa-check text-success me-2"></i>Predictive analytics for access patterns</li>
+                                <li><i class="fas fa-check text-success me-2"></i>ML-driven role mining and optimization</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Behavioral anomaly detection</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="fas fa-tachometer-alt fa-3x text-warning mb-3"></i>
+                            <h5>Rapid Time-to-Value</h5>
+                            <p class="text-muted">Pre-configured templates and accelerators enable 60% faster deployment compared to traditional IGA solutions</p>
+                            <ul class="list-unstyled text-start">
+                                <li><i class="fas fa-check text-success me-2"></i>6-12 week implementation</li>
+                                <li><i class="fas fa-check text-success me-2"></i>500+ pre-built connectors</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Industry-specific templates</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROI & Cost Benefits -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Proven ROI & Cost Benefits</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-3">
+                                    <h3 class="text-success">65%</h3>
+                                    <h6>Operational Cost Reduction</h6>
+                                    <small class="text-muted">Automated provisioning and self-service capabilities</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <h3 class="text-primary">80%</h3>
+                                    <h6>Faster User Provisioning</h6>
+                                    <small class="text-muted">From days/weeks to minutes with automation</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <h3 class="text-warning">90%</h3>
+                                    <h6>Compliance Audit Efficiency</h6>
+                                    <small class="text-muted">Automated reporting and continuous monitoring</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <h3 class="text-info">$2.4M</h3>
+                                    <h6>Average Annual Savings</h6>
+                                    <small class="text-muted">Reduced licensing, infrastructure, and labor costs</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Capabilities -->
+            <div class="row mb-5">
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <h5><i class="fas fa-shield-check text-success me-2"></i>Advanced Security & Compliance</h5>
+                            <div class="row">
+                                <div class="col-6">
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success me-2"></i>Zero Trust Architecture</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Continuous Compliance Monitoring</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Real-time Risk Assessment</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>SOX/GDPR/HIPAA Ready</li>
+                                    </ul>
+                                </div>
+                                <div class="col-6">
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success me-2"></i>Privileged Access Management</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Dynamic Segregation of Duties</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Anomaly Detection</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Threat Intelligence Integration</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <h5><i class="fas fa-users-cog text-primary me-2"></i>Enhanced User Experience</h5>
+                            <div class="row">
+                                <div class="col-6">
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success me-2"></i>Self-Service Portal</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Mobile-First Design</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>One-Click Access Requests</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Intelligent Recommendations</li>
+                                    </ul>
+                                </div>
+                                <div class="col-6">
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success me-2"></i>Contextual Approvals</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Bulk Operations</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Multi-language Support</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Customizable Dashboards</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Integration & Scalability -->
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <h5><i class="fas fa-plug text-info me-2"></i>Enterprise Integration</h5>
+                            <p class="text-muted mb-3">Seamless connectivity with your existing technology stack</p>
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <i class="fab fa-microsoft fa-2x text-primary mb-2"></i>
+                                    <small class="d-block">Active Directory</small>
+                                </div>
+                                <div class="col-4">
+                                    <i class="fab fa-aws fa-2x text-warning mb-2"></i>
+                                    <small class="d-block">AWS</small>
+                                </div>
+                                <div class="col-4">
+                                    <i class="fab fa-google fa-2x text-danger mb-2"></i>
+                                    <small class="d-block">Google Cloud</small>
+                                </div>
+                                <div class="col-4 mt-3">
+                                    <i class="fab fa-salesforce fa-2x text-info mb-2"></i>
+                                    <small class="d-block">Salesforce</small>
+                                </div>
+                                <div class="col-4 mt-3">
+                                    <i class="fab fa-slack fa-2x text-success mb-2"></i>
+                                    <small class="d-block">Slack</small>
+                                </div>
+                                <div class="col-4 mt-3">
+                                    <i class="fas fa-plus-circle fa-2x text-secondary mb-2"></i>
+                                    <small class="d-block">500+ More</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <h5><i class="fas fa-expand-arrows-alt text-warning me-2"></i>Unlimited Scalability</h5>
+                            <p class="text-muted mb-3">Grows with your organization without performance degradation</p>
+                            <div class="progress mb-3">
+                                <div class="progress-bar bg-success" style="width: 95%">
+                                    <small>10M+ Identities Supported</small>
+                                </div>
+                            </div>
+                            <div class="progress mb-3">
+                                <div class="progress-bar bg-info" style="width: 90%">
+                                    <small>Multi-Region Deployment</small>
+                                </div>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-warning" style="width: 85%">
+                                    <small>Enterprise-Grade Performance</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Call to Action -->
+            <div class="text-center mt-5">
+                <div class="card bg-primary text-white">
+                    <div class="card-body py-4">
+                        <h4>Ready to Transform Your Identity Governance?</h4>
+                        <p class="mb-4">Join 500+ organizations who have modernized their IGA with Saviynt</p>
+                        <button class="btn btn-light btn-lg me-3" onclick="window.location.href='/discovery'">
+                            <i class="fas fa-rocket me-2"></i>Start Your Migration Journey
+                        </button>
+                        <button class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-phone me-2"></i>Schedule Consultation
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Rex-AI-Palooza Legacy IGA Migration</h5>
+                    <p class="text-muted mb-0">Powered by Accenture Security</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="text-muted mb-0"> 2025 Enterprise Migration Platform</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function selectSystem(systemId) {
+            // Store selected system and redirect to discovery
+            sessionStorage.setItem('selectedSystem', systemId);
+            window.location.href = '/discovery';
+        }
+    </script>
+</body>
+</html>
